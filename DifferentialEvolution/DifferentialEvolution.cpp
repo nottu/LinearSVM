@@ -30,15 +30,19 @@ DifferentialEvolution::DifferentialEvolution(vector<Individual> &pop, unsigned m
                                              : __cr(cr), __F(F), max_evals(max_ev) {
   __problem = problem;
   minimize = (type == ProblemType::MINIMIZE);
-  num_vars = pop[0].get_data().size();
+  num_vars = (unsigned) pop[0].get_data().size();
+  population = pop;
 }
 
 DifferentialEvolution::Individual DifferentialEvolution::getBest(){
   unsigned idx = 0;
-  double min = population[0].get_value();
+  double val = population[0].get_value();
   for (unsigned i = 1; i < population.size(); i++) {
-    if(population[i].get_value() < min) {
-      min = population[i].get_value();
+    if(minimize && population[i].get_value() < val) {
+      val = population[i].get_value();
+      idx = i;
+    } else if(!minimize && population[i].get_value() > val) {
+      val = population[i].get_value();
       idx = i;
     }
   }
@@ -70,9 +74,19 @@ bool DifferentialEvolution::iterate() {
     double fit = __problem->evaluateFunction(dat);
     max_evals-- ;
     ind.set_value(fit);
-    if(fit < item.get_value()) children.emplace_back(ind);
-    else children.emplace_back(item);
+    if(minimize) {
+      if(fit < item.get_value())
+        children.emplace_back(ind);
+      else
+        children.emplace_back(item);
+    } else {
+      if(fit > item.get_value())
+        children.emplace_back(ind);
+      else
+        children.emplace_back(item);
+    }
   }
+  population = children;
   return max_evals > 0;
 }
 
@@ -90,4 +104,11 @@ DifferentialEvolution::Individual::Individual(vect &dat){
   for (auto& d : dat) {
     data.push_back(d);
   }
+}
+DifferentialEvolution::Individual::Individual(vect &dat, double val){
+  data.clear();
+  for (auto& d : dat) {
+    data.push_back(d);
+  }
+  value = val;
 }

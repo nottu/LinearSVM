@@ -37,6 +37,7 @@ public:
   double get_value();
   void set_value(double val);
   explicit Individual(vect &dat);
+  Individual(vect &dat, double val);
 };
 
 #endif //SVM_DIFFERENTIALEVOLUTION_HPP

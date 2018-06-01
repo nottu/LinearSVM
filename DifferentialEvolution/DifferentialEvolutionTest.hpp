@@ -15,7 +15,7 @@ public:
   static void runTest(Test test, unsigned n_vars);
 };
 
-class TestProblem : OptimizationProblem {
+class TestProblem : public OptimizationProblem {
   int n_vars;
   Test test;
   double evaluateSphere(vect vals);
