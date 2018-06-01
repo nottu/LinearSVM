@@ -4,18 +4,53 @@
 
 #include "SVMDE.hpp"
 
+#include <vector>
+
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 #define HINGE(x) MAX(x, 0)
 
-SVMDE::SVMDE(Data &d) : dat(d) {}
+using namespace std;
 
-SVMDE::SVMDE_Problem::SVMDE_Problem(Data &d, double m, double cte) : dat(d), mu(m) ,c(cte) {
+//Sabemos que beta es una combinación lineal de los vectores de soporte, inicializamos cada individuo con
+// valores de x_i aleatorios, uno para y_i = -1 y otro con y_i = 1
+DifferentialEvolution::Individual SVMDE::generateIndividual(SVMDE_Problem &problem){
+  vect betas;
+  betas.reserve(num_vars);
+  auto alp = 0.5; //( (double) rand()) / ((double) RAND_MAX);
+  unsigned idx = rand() % num_instances;
+  for(auto &v : dat.x[idx]) betas.push_back(v * alp);
+  int cat = dat.y[idx];
+  do {
+    idx = rand() % num_instances;
+  } while(dat.y[idx] == cat);
+  for(int i = 0; i < num_vars; ++i) betas[i] += (dat.x[idx][i] * (1 - alp));
+  int beta0 = 10 - rand() % 20;
+  betas.push_back(beta0);
+  auto fit = problem.evaluateFunction(betas);
+  return DifferentialEvolution::Individual(betas, fit);
+}
+
+SVMDE::SVMDE(Data &d, unsigned n, unsigned ev) : dat(d), n_pop(n), max_evals(ev) {
+  num_instances = (unsigned) d.x.size();
+  num_vars = 1 + (unsigned) d.x.at(0).size();
+}
+vect SVMDE::getHyper() {
+  SVMDE_Problem problem(dat, 1);
+  vector<DifferentialEvolution::Individual> pop;
+  for (int i = 0; i < n_pop; ++i) {
+    auto indi = generateIndividual(problem);
+    pop.emplace_back(indi);
+  }
+  DifferentialEvolution de(pop, max_evals, 0.5, 0.75, &problem, ProblemType::MINIMIZE);
+  while(de.iterate());
+  auto best = de.getBest();
+  return best.get_data();
+}
+
+SVMDE::SVMDE_Problem::SVMDE_Problem(Data &d, double cte) : dat(d) ,c(cte) {
   dim = (unsigned) d.x[0].size();
   sz  = (unsigned) d.x.size();
 }
-
-double SVMDE::SVMDE_Problem::get_mu() {return mu;}
-void SVMDE::SVMDE_Problem::set_mu(double m) {mu = m;};
 
 double SVMDE::SVMDE_Problem::evaluateFunction(vect& vals){
   vect betas(vals.begin(), vals.begin() + dim);
@@ -23,40 +58,8 @@ double SVMDE::SVMDE_Problem::evaluateFunction(vect& vals){
   double val = c * Vector::norm2(betas);
   for (int i = 0; i < sz; ++i) {
     double classif = Vector::dotProduct(betas, dat.x[i]) + alpha;
-    double errClas = HINGE(1 - classif);
+    double errClas = HINGE(1 - dat.y[i]*classif);
     val += errClas;
   }
   return val;
-}
-
-//double SVMDE::SVMDE_Problem::evaluateFunction(vect& vals){
-//  vect betas(vals.begin(), vals.begin() + dim);
-//  double beta0 = vals[dim];
-//  vect errors(vals.begin() + dim + 1, vals.end());
-//  double val = 0;
-//  val += fitnessValue(betas, errors);
-//  vect rest = restrictions(vals, beta0, errors);
-//  for (auto& r : rest){
-//    val += (mu/2.0) * (r * r);
-//  }
-//  return val;
-//}
-double SVMDE::SVMDE_Problem::fitnessValue(vect& betas, vect& errors){
-  double cerr = 0;
-  for(auto &err : errors)
-    cerr += err;
-  return Vector::norm2(betas);
-}
-vect SVMDE::SVMDE_Problem::restrictions(vect& betas, double beta0, vect& errors){
-  vect r;
-  r.reserve(sz * 2);
-
-  for (int i = 0; i < sz; ++i) {
-    double proy = Vector::dotProduct(betas, dat.x[i]) + beta0;
-    double classfit = dat.y[i] * proy;
-    r.push_back( HINGE(1 - errors[i] - classfit) );
-    r.push_back( HINGE(-errors[i]) );
-  }
-
-  return r;
 }

@@ -49,7 +49,9 @@ double Vector::dotProduct(vect &v1, vect &v2){
     val += v1[i] * v2[i];
   return val;
 }
-
+void Vector::printVector(vect &v){
+  for (auto &val : v) cout << val << "\t";
+}
 // MATRIX FUNCTIONS
 
 void Matrix::multiply(matrix &m1, matrix &m2, matrix &out){

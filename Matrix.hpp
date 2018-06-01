@@ -18,6 +18,8 @@ public:
   static double norm1(vect &v);
   static double norm2(vect &v);
   static double dotProduct(vect &v1, vect &v2);
+
+  static void printVector(vect &v);
 };
 
 class Matrix {

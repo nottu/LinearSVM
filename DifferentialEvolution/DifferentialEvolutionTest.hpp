@@ -18,10 +18,10 @@ public:
 class TestProblem : public OptimizationProblem {
   int n_vars;
   Test test;
-  double evaluateSphere(vect vals);
+  double evaluateSphere(vect& vals);
 public:
   TestProblem(Test tst, int num_vars);
-  double evaluateFunction(vect vals) override ;
+  double evaluateFunction(vect& vals) override ;
 };
 
 #endif //SVM_DIFFERENTIALEVOLUTIONTEST_HPP

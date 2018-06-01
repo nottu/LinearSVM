@@ -1,4 +1,3 @@
-
 //
 // Created by Javier Peralta on 5/31/18.
 //
@@ -31,15 +30,16 @@ void DifferentialEvolutionTest::runTest(Test test, unsigned n_vars){
   DifferentialEvolution::Individual best = de.getBest();
   cout << "best " << best.get_value();
 }
-double TestProblem::evaluateSphere(vect vals){
+
+TestProblem::TestProblem(Test tst, int num_vars){}
+double TestProblem::evaluateSphere(vect& vals){
   double val = 0;
   for (auto& var: vals){
     val += var * var;
   }
   return val;
 }
-TestProblem::TestProblem(Test tst, int num_vars){}
-double TestProblem::evaluateFunction(vect vals){
+double TestProblem::evaluateFunction(vect& vals){
   switch (test){
     case Test::shpere:
       return evaluateSphere(vals);

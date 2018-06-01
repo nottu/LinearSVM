@@ -11,7 +11,7 @@ enum class ProblemType{MINIMIZE, MAXIMIZE};
 
 class OptimizationProblem {
 public:
-  virtual double evaluateFunction(vect vals) = 0;
+  virtual double evaluateFunction(vect& vals) = 0;
 };
 
 
