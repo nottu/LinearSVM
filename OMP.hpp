@@ -9,13 +9,18 @@
 
 class OMP {
   Data dat;
-  std::vector<double> u;
-  std::vector<double> r;
-
+  vect u;
+  vect r;
+  unsigned t;
+  std::vector<unsigned> I;
+  std::vector<unsigned> L;
+  void updateResidual();
+  void getLambda();
+  void updateU();
 
 public:
-  OMP(Data &dat);
-  void iterate(unsigned max_iter, unsigned s, double threshold);
+  OMP(Data &dat, unsigned s);
+  bool iterate(double threshold);
 };
 
 
