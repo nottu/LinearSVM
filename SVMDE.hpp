@@ -17,9 +17,11 @@ private:
   unsigned n_pop, max_evals, num_vars, num_instances;
   Data dat;
   DifferentialEvolution::Individual generateIndividual(SVMDE_Problem &problem);
+  vect clasif;
 public:
   SVMDE(Data &d, unsigned n_pop=30, unsigned max_evals=15000);
-  vect getHyper();
+  vect getHyper(double cte=1, double cr=0.5, double F=0.75);
+  int predict(vect& x);
 };
 
 class SVMDE::SVMDE_Problem : public OptimizationProblem {

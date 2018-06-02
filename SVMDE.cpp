@@ -4,6 +4,7 @@
 
 #include "SVMDE.hpp"
 
+#include <cmath>
 #include <vector>
 
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
@@ -18,12 +19,15 @@ DifferentialEvolution::Individual SVMDE::generateIndividual(SVMDE_Problem &probl
   betas.reserve(num_vars);
   auto alp = 0.5; //( (double) rand()) / ((double) RAND_MAX);
   unsigned idx = rand() % num_instances;
-  for(auto &v : dat.x[idx]) betas.push_back(v * alp);
+  for(auto &v : dat.x[idx])
+    betas.push_back(v * alp);
   int cat = dat.y[idx];
   do {
     idx = rand() % num_instances;
   } while(dat.y[idx] == cat);
-  for(int i = 0; i < num_vars; ++i) betas[i] += (dat.x[idx][i] * (1 - alp));
+  for(int i = 0; i < num_vars; ++i)
+    betas[i] += (dat.x[idx][i] * (1 - alp));
+
   int beta0 = 10 - rand() % 20;
   betas.push_back(beta0);
   auto fit = problem.evaluateFunction(betas);
@@ -34,17 +38,23 @@ SVMDE::SVMDE(Data &d, unsigned n, unsigned ev) : dat(d), n_pop(n), max_evals(ev)
   num_instances = (unsigned) d.x.size();
   num_vars = 1 + (unsigned) d.x.at(0).size();
 }
-vect SVMDE::getHyper() {
-  SVMDE_Problem problem(dat, 1);
+vect SVMDE::getHyper(double cte, double cr, double F) {
+  SVMDE_Problem problem(dat, cte);
   vector<DifferentialEvolution::Individual> pop;
   for (int i = 0; i < n_pop; ++i) {
     auto indi = generateIndividual(problem);
     pop.emplace_back(indi);
   }
-  DifferentialEvolution de(pop, max_evals, 0.5, 0.75, &problem, ProblemType::MINIMIZE);
+  DifferentialEvolution de(pop, max_evals, cr, F, &problem, ProblemType::MINIMIZE);
   while(de.iterate());
   auto best = de.getBest();
-  return best.get_data();
+  clasif = best.get_data();
+  return clasif;
+}
+int SVMDE::predict(vect& x){
+  vect betas(clasif.begin(), clasif.end() - 1);
+  double cl = Vector::dotProduct(x, clasif) + clasif.back();
+  return cl > 0 ? 1 : -1;
 }
 
 SVMDE::SVMDE_Problem::SVMDE_Problem(Data &d, double cte) : dat(d) ,c(cte) {
