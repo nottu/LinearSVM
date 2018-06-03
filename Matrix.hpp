@@ -12,8 +12,11 @@ typedef std::vector<double> vect;
 
 class Vector {
 public:
-  static void substract(vect &v1, vect &v2, vect &out);
-  static void add(vect &v1, vect &v2, vect &out);
+
+  static void scale(vect &v, double s);
+
+  static vect substract(vect &v1, vect &v2);
+  static vect add(vect &v1, vect &v2);
 
   static double norm1(vect &v);
   static double norm2(vect &v);
@@ -24,8 +27,18 @@ public:
 
 class Matrix {
 public:
-  static void multiply(matrix &m1, matrix &m2, matrix &out);
-  static void multiply_vector(matrix &m1, vect &m2, vect &out);
+
+  static matrix addMatrix(matrix &m1, matrix &m2);
+
+  static matrix multiply(matrix &m1, matrix &m2);
+  static matrix multiplyTransposed(matrix &m1, matrix &m2);
+  static matrix transposedMultiply(matrix &m1, matrix &m2);
+
+  static vect multiply_vector(matrix &m1, vect &v);
+  static vect multiplyTransposed_vector(matrix &m1, vect &v);
+
+  static matrix getIdentity(unsigned n);
+  static matrix transposeMatrix(matrix &m1);
 };
 
 

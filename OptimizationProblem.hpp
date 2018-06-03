@@ -14,5 +14,10 @@ public:
   virtual double evaluateFunction(vect& vals) = 0;
 };
 
+class LeastSquaresProblem {
+public:
+  virtual vect evaluateFunction(vect& vals) = 0;
+  virtual matrix evaluateJacobian(vect& vals) = 0;
+};
 
 #endif //SVM_OPTIMIZATIONPROBLEM_HPP

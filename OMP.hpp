@@ -6,6 +6,7 @@
 #define SVM_OMP_HPP
 
 #include "Data.hpp"
+#include "OptimizationProblem.hpp"
 
 class OMP {
   Data dat;
@@ -17,11 +18,22 @@ class OMP {
   void updateResidual();
   void getLambda();
   void updateU();
-
+  friend class OMP_LS;
+  class OMP_LS;
 public:
   OMP(Data &dat, unsigned s);
   bool iterate(double threshold);
+  int predict(vect& x);
+  void printHyper();
 };
 
+class OMP::OMP_LS : public LeastSquaresProblem {
+  OMP *parent;
+  double h=0.01;
+public:
+  OMP_LS(OMP *parent);
+  vect evaluateFunction (vect& vals) override;
+  matrix evaluateJacobian(vect& vals) override ;
+};
 
 #endif //SVM_OMP_HPP
